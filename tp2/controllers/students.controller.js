@@ -1,46 +1,58 @@
 const students = require('../models/students');
 
-// GET /students
-// Get all students
-const getAllStudents = (req, res) => {
-    res.json(students);
+const getAllStudents = async (req, res) => {
+    try {
+        const allStudents = await students.find();
+        res.json(allStudents);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-// GET /students/:id
-// Get a single student by id
-const getStudentById = (req, res) => {
-    const { id } = req.params;
-    const foundStudent = students.find(student => student.id === id);
-    res.json(foundStudent);
+const getStudentById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const foundStudent = await students.findById(id);
+        res.json(foundStudent);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-// POST /students
-// Create a new student
-const createStudent = (req, res) => {
-    const newStudent = req.body;
-    students.push(newStudent);
-    res.json(students);
+const createStudent = async (req, res) => {
+    try {
+        const student = req.body;
+        const newStudent = await students.create(student);
+        res.json(newStudent);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-// PUT /course/:id
-// Update a student by id
-const updateStudent = (req, res) => {
-    const { id } = req.params;
-    const updatedStudent = req.body;
-    const foundStudent = students.find(student => student.id === id);
-    Object.assign(foundStudent, updatedStudent);
-    res.json(students);
+const updateStudent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedStudent = req.body;
+        const foundStudent = await students.findById(id);
+        Object.assign(foundStudent, updatedStudent);
+        const savedStudent = await foundStudent.save();
+        res.json(savedStudent);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 }
 
-// DELETE /students/remove/:id
-// Delete a student's course by id
-const deleteStudent = (req, res) => {
-    const { id } = req.params;
-    const foundStudent = students.find(student => student.id === id);
-    delete foundStudent.courses;
-    res.json(students);
+const deleteStudent = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const foundStudent = await students.findById(id);
+        await foundStudent.remove();
+        res.json({ message: 'Student deleted' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 }
-
+        
 module.exports = {
     getAllStudents,
     getStudentById,

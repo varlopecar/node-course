@@ -1,11 +1,13 @@
-require("dotenv").config();
-const PORT = process.env.PORT || 3001;
-const mongoose = require("mongoose");
-const express = require("express");
-const app = express();
+const express = require('express');
+const router = express.Router();
+const Planet = require('../models/planets.model');
+const { getPlanets, getPlanet, getColor, getSize, createPlanet, deletePlanet } = require('../controllers/planet.controller');
 
-mongoose.connect(process.env.DB_CONNECTION)
-    .then(() => console.log("Connected to MongoDB"))
-    .then(() => app.listen(PORT, () => console.log(`Listening on port ${PORT}`)))
-    .catch(err => console.log(err));
-    
+router.get('/', getPlanets);
+router.get('/:id', getPlanet);
+router.get('/color/:color', getColor);
+router.get('/size/:size', getSize);
+router.post('/', createPlanet);
+router.delete('/:id', deletePlanet);
+
+module.exports = router;

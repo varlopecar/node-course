@@ -1,73 +1,70 @@
-const express = require('express');
-const cors = require('cors');
-const app = express();
-const PORT = 3002;
-const { planets } = require('../models/planets');
+const Planet = require('../models/planets.model');
 
-app.use(express.json());
+const getPlanets = async (req, res) => {
+    try {
+        const planets = await Planet.find();
+        res.status(200).json(planets);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
 
-app.use((req, res, next) => {
-    console.log(`Request received: ${req.method} ${req.url}`);
-    next();
-});
+const getPlanet = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const planet = await Planet.findById(id);
+        res.status(200).json(planet);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
 
-app.use(cors({
-    origin: '*'
-}));
+const getColor = async (req, res) => {
+    const { color } = req.params;
+    try {
+        const planet = await Planet.findOne({ color: color });
+        res.status(200).json(planet);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
 
-app.use((req, res, next) => {
-    // time now in milliseconds
-    const now = new Date().getTime();
-    next();
-    const duration = new Date().getTime() - now;
-    console.log(`Request took: ${duration}ms`);
-});
+const getSize = async (req, res) => {
+    const { size } = req.params;
+    try {
+        const planet = await Planet.findOne({ $lt: { size: size } });
+        res.status(200).json(planet);
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
-
-app.get('/messages', (req, res) => {
-    res.send('<html><body><h1>Messages!</h1></body></html>');
-});
-
-app.get('/planets', (req, res) => {
-    res.send(planets);
-});
-
-app.get('/planets/:id', (req, res) => {
-    const planet = planets.find((planet) => planet.id === Number(req.params.id));
-    res.send(planet);
-});
-
-app.get('/planets/color/:color', (req, res) => {
-    const planet = planets.filter((planet) => planet.color === req.params.color);
-    res.send(planet);
-});
-
-app.get('/planets/size/:size', (req, res) => {
-    const planet = planets.filter((planet) => planet.size === Number(req.params.size));
-    res.send(planet);
-});
-
-app.use((req, res) => {
-    res.status(404).send('404: Page not Found');
-});
-
-app.post('/planets', (req, res) => {
+const createPlanet = async (req, res) => {
     const planet = req.body;
-    planets.push(planet);
-    res.send('Got a POST request');
-});
+    const newPlanet = new Planet(planet);
+    try {
+        await newPlanet.save();
+        res.status(201).json(newPlanet);
+    } catch (error) {
+        res.status(409).json({ message: error.message });
+    }
+}
 
-// delete a planet
-app.delete('/planets/:id', (req, res) => {
-    const planet = planets.find((planet) => planet.id === Number(req.params.id));
-    const index = planets.indexOf(planet);
-    planets.splice(index, 1);
-    res.send('Got a DELETE request');
-});
+const deletePlanet = async (req, res) => {
+    const { id } = req.params;
+    try {
+        await Planet.findByIdAndRemove(id);
+        res.status(200).json({ message: "Planet deleted successfully" });
+    } catch (error) {
+        res.status(404).json({ message: error.message });
+    }
+}
 
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+module.exports = {
+    getPlanets,
+    getPlanet,
+    getColor,
+    getSize,
+    createPlanet,
+    deletePlanet
+}

@@ -1,0 +1,9 @@
+type Order {
+    id: ID!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+    status: OrderStatus!
+    total: Float!
+    items: [OrderItem!]!
+    user: User!
+}

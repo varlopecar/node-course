@@ -1,19 +1,24 @@
 const express = require('express');
 const { graphqlHTTP } = require('express-graphql');
+const { buildSchema } = require('graphql');
+const { loadFilesSync } = require('@graphql-tools/load-files');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const products = require('./schema/products/products.model');
+const orders = require('./schema/orders/orders.model');
 const bodyParser = require('body-parser');
 const app = express();
-const PORT = 3001;
+const PORT = 3002;
 
-// GraphQL schema
-const schema = gql`
-    type Query {
-        message: String
-    }
-`;
+const typesArray = loadFilesSync(`${__dirname}/schema/*.graphql`);
+
+const schema = makeExecutableSchema({
+    typeDefs: typesArray
+});  
 
 // Root resolver
 const root = {
-    message: () => 'Hello World!'
+    products: () => products,
+    orders: () => orders,
 };
 
 app.use(bodyParser.json());
